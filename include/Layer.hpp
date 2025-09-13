@@ -9,9 +9,9 @@ enum class Activation {
     Softmax
 };
 
-class Layer 
+class Layer
 {
-    private:   
+    protected:
         Matrix A;
         Matrix b;
         Matrix W;
@@ -22,12 +22,44 @@ class Layer
         Matrix dW;
         Matrix dZ;
 
+        const Matrix& prev_A;
+        Matrix* prev_dA;
+        
     public:
-        Layer(size_t input_size, size_t output_size);
+        Layer(size_t input_size, size_t output_size, const Matrix& prev_A, Matrix* prev_dA);
+        ~Layer() = default;
 
-        void forward(const Matrix& prev_A, Activation activation);
-        void backprop(const Matrix& prev_A, Matrix& prev_dA);
+        // Getters
+        const Matrix& getA() const;
+        const Matrix& get_dA() const;
+        Matrix& get_dA();
+        const Matrix& get_dZ() const;
 
-        const Matrix& getA();
+        // Setters
+        void setA(const Matrix& g);
         void set_dA(const Matrix& g);
+        void set_dZ(const Matrix& g);
+
+        virtual void forward() = 0;
+        virtual void backprop() = 0;
+
+        void step(double learning_rate);
+};
+
+class HiddenLayer final : public Layer
+{
+    public:
+        HiddenLayer(size_t input_size, size_t output_size, const Matrix& prev_A, Matrix* prev_dA);
+
+        void forward() override;
+        void backprop() override;
+};
+
+class OutputLayer : public Layer
+{
+    public:
+        OutputLayer(size_t input_size, size_t output_size, const Matrix& prev_A, Matrix* prev_dA);
+
+        void forward() override;
+        void backprop() override;
 };

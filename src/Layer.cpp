@@ -2,43 +2,84 @@
 
 #include "Layer.hpp"
 
-Layer::Layer(size_t input_size, size_t output_size)
-{
-    A = Matrix(output_size, 1);
-    b = Matrix(output_size, 1);
-    W = Matrix(output_size, input_size);
-    Z = Matrix(output_size, 1);
+// Constructor
 
-    dA = Matrix(output_size, 1);
-    db = Matrix(output_size, 1);
-    dW = Matrix(output_size, input_size);
-    dZ = Matrix(output_size, 1);
-}
+Layer::Layer(size_t input_size, size_t output_size, const Matrix& prev_A, Matrix* prev_dA) :
+    A(output_size, 1),
+    b(output_size, 1), 
+    W(output_size, input_size),
+    Z(output_size, 1),
 
-const Matrix& Layer::getA() { return A; }
+    dA(output_size, 1),
+    db(output_size, 1),
+    dW(output_size, input_size),
+    dZ(output_size, 1),
+
+    prev_A(prev_A),
+    prev_dA(prev_dA)
+{ }
+
+HiddenLayer::HiddenLayer(size_t input_size, size_t output_size, const Matrix& prev_A, Matrix* prev_dA) :
+    Layer(input_size, output_size, prev_A, prev_dA) { }
+
+OutputLayer::OutputLayer(size_t input_size, size_t output_size, const Matrix& prev_A, Matrix* prev_dA) :
+    Layer(input_size, output_size, prev_A, prev_dA) { }
+
+// Getters and Setters
+
+const Matrix& Layer::getA() const { return A; }
+const Matrix& Layer::get_dA() const { return dA; }
+Matrix& Layer::get_dA() { return dA; }
+
+void Layer::setA(const Matrix& g) { A = g; }
 void Layer::set_dA(const Matrix& g) { dA = g; }
 
-void Layer::forward(const Matrix& prev_A, Activation activation)
-{
-    Z = (W * prev_A) + b;
+const Matrix& Layer::get_dZ() const { return dZ; }
+void Layer::set_dZ(const Matrix& g) { dZ = g; }
 
-    switch (activation)
-    {
-        case Activation::ReLU:
-            A = Z.relu();
-            break;
-        case Activation::Softmax:
-            A = Z.softmax();
-            break;
-        default:
-            break;
-    }
+void Layer::step(double learning_rate)
+{
+    W -= (dW * learning_rate);
+    b -= (db * learning_rate);
 }
 
-void Layer::backprop(const Matrix& prev_A, Matrix& prev_dA)
+// Hidden Layer
+
+void HiddenLayer::forward()
+{
+    Z = (W * prev_A) + b;
+    A = Z.relu();
+}
+
+void HiddenLayer::backprop()
 {
     dZ = dA.hadamard(Z.drelu());
     dW = dZ * prev_A.transpose();
-    prev_dA = W.transpose() * dZ;
     db = dZ;
+
+    if (prev_dA != nullptr)
+    {
+        Matrix temp = W.transpose() * dZ;
+        *prev_dA = temp;
+    }
+}
+
+// Output Layer
+
+void OutputLayer::forward()
+{
+    Z = (W * prev_A) + b;
+    A = Z.softmax();
+}
+
+void OutputLayer::backprop()
+{
+    dW = dZ * prev_A.transpose();
+    db = dZ;
+
+    if (prev_dA != nullptr)
+    {
+        Matrix temp = W.transpose() * dZ;
+        *prev_dA = temp;
+    }
 }

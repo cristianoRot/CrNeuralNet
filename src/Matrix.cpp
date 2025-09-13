@@ -71,11 +71,6 @@ Matrix Matrix::operator-(const Matrix& other) const
 
 Matrix& Matrix::operator=(const Matrix& other)
 {
-    if (row != other.row || col != other.col)
-    {
-        throw std::invalid_argument("Matrix dimensions must match for assignment");
-    }
-
     row = other.row;
     col = other.col;
     data = other.data;
