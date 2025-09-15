@@ -10,6 +10,8 @@ class Dataset
         std::vector<Matrix> inputs;
         std::vector<size_t> outputs;
 
+        std::vector<size_t> perm_idx;
+
     public:
         Dataset(std::vector<Matrix> inputs, std::vector<size_t> outputs);
 
