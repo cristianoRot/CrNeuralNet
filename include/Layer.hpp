@@ -26,11 +26,11 @@ class Layer
         Matrix dW;
         Matrix dZ;
 
-        const Matrix& prev_A;
+        const Matrix* prev_A;
         Matrix* prev_dA;
         
     public:
-        Layer(size_t input_size, size_t output_size, const Matrix& prev_A, Matrix* prev_dA);
+        Layer(size_t input_size, size_t output_size, const Matrix* prev_A, Matrix* prev_dA);
         ~Layer() = default;
 
         void init_weights(InitType init_type);
@@ -56,7 +56,7 @@ class Layer
 class HiddenLayer final : public Layer
 {
     public:
-        HiddenLayer(size_t input_size, size_t output_size, const Matrix& prev_A, Matrix* prev_dA);
+        HiddenLayer(size_t input_size, size_t output_size, const Matrix* prev_A, Matrix* prev_dA);
 
         void forward() override;
         void backprop() override;
@@ -65,7 +65,7 @@ class HiddenLayer final : public Layer
 class OutputLayer : public Layer
 {
     public:
-        OutputLayer(size_t input_size, size_t output_size, const Matrix& prev_A, Matrix* prev_dA);
+        OutputLayer(size_t input_size, size_t output_size, const Matrix* prev_A, Matrix* prev_dA);
 
         void forward() override;
         void backprop() override;

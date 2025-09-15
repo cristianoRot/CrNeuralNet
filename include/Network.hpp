@@ -35,6 +35,10 @@ class Network
         void step(double learning_rate);
 
         void loss_gradient(size_t label);
+
         void compute_accuracy(const Matrix& prediction, size_t label);
+        void reset_accuracy();
+        void print_accuracy();
+
         size_t argmax(const Matrix& prediction);
 };

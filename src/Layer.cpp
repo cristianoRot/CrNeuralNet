@@ -6,7 +6,7 @@
 
 // Constructor
 
-Layer::Layer(size_t input_size, size_t output_size, const Matrix& prev_A, Matrix* prev_dA) :
+Layer::Layer(size_t input_size, size_t output_size, const Matrix* prev_A, Matrix* prev_dA) :
     input_size(input_size),
     output_size(output_size),
 
@@ -24,10 +24,10 @@ Layer::Layer(size_t input_size, size_t output_size, const Matrix& prev_A, Matrix
     prev_dA(prev_dA)
 { }
 
-HiddenLayer::HiddenLayer(size_t input_size, size_t output_size, const Matrix& prev_A, Matrix* prev_dA) :
+HiddenLayer::HiddenLayer(size_t input_size, size_t output_size, const Matrix* prev_A, Matrix* prev_dA) :
     Layer(input_size, output_size, prev_A, prev_dA) { }
 
-OutputLayer::OutputLayer(size_t input_size, size_t output_size, const Matrix& prev_A, Matrix* prev_dA) :
+OutputLayer::OutputLayer(size_t input_size, size_t output_size, const Matrix* prev_A, Matrix* prev_dA) :
     Layer(input_size, output_size, prev_A, prev_dA) { }
 
 // Getters and Setters
@@ -89,14 +89,14 @@ void Layer::init_weights(InitType init_type)
 
 void HiddenLayer::forward()
 {
-    Z = (W * prev_A) + b;
+    Z = (W * (*prev_A)) + b;
     A = Z.relu();
 }
 
 void HiddenLayer::backprop()
 {
     dZ = dA.hadamard(Z.drelu());
-    dW = dZ * prev_A.transpose();
+    dW = dZ * prev_A->transpose();
     db = dZ;
 
     if (prev_dA != nullptr)
@@ -110,13 +110,13 @@ void HiddenLayer::backprop()
 
 void OutputLayer::forward()
 {
-    Z = (W * prev_A) + b;
+    Z = (W * (*prev_A)) + b;
     A = Z.softmax();
 }
 
 void OutputLayer::backprop()
 {
-    dW = dZ * prev_A.transpose();
+    dW = dZ * prev_A->transpose();
     db = dZ;
 
     if (prev_dA != nullptr)

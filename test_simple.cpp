@@ -18,11 +18,11 @@ int main() {
     outputs.push_back(0);
     
     Dataset dataset(inputs, outputs);
-    Network network({2, 4, 2}, InitType::He, 0.1);
+    Network network({2, 2, 2}, InitType::He, 0.5);
     
-    std::cout << "Training rete neurale..." << std::endl;
-    network.train(dataset, 100);
+    std::cout << "Starting training..." << std::endl;
+    network.train(dataset, 10000);
     
-    std::cout << "Test completato!" << std::endl;
+    std::cout << "Training completed!" << std::endl;
     return 0;
 }

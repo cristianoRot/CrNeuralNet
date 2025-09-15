@@ -15,12 +15,14 @@ Network::Network(std::vector<size_t> layer_sizes, InitType init_type, double lea
 
     const Matrix* prev_A = &input_layer;
     Matrix* prev_dA = nullptr;
+
+    layers.reserve(layer_sizes.size() - 2);
     
     for (size_t i = 1; i < layer_sizes.size() - 1; i++)
     {
         layers.push_back(HiddenLayer(layer_sizes[i - 1], 
                                     layer_sizes[i],
-                                    *prev_A,
+                                    prev_A,
                                     prev_dA));
 
         HiddenLayer& last_layer = layers.back();
@@ -33,7 +35,7 @@ Network::Network(std::vector<size_t> layer_sizes, InitType init_type, double lea
     output_layer = std::make_unique<OutputLayer>(
         layer_sizes[vector_size - 2],
         layer_sizes[vector_size - 1],
-        *prev_A,
+        prev_A,
         prev_dA
     );
 
@@ -56,9 +58,11 @@ const Matrix& Network::get_output() const { return output_layer->getA(); }
 
 void Network::train(Dataset& dataset, size_t epochs)
 {
-    for (size_t e = 0; e < epochs; e++)
+    for (size_t epoch = 0; epoch < epochs; epoch++)
     {
         dataset.shuffle();
+
+        std::cout << "Epoch " << epoch << "..." << std::endl;
 
         for (size_t i = 0; i < dataset.size(); i++)
         {
@@ -71,6 +75,11 @@ void Network::train(Dataset& dataset, size_t epochs)
             backprop(label);
             step(learning_rate);
         }
+
+        print_accuracy();
+        reset_accuracy();
+
+        if (epoch % 10 == 0 && epoch > 0) learning_rate *= 0.1;
     }
 }
 
@@ -123,6 +132,16 @@ void Network::compute_accuracy(const Matrix& prediction, size_t label)
     if (argmax == label) correct_predictions++;
     
     total_predictions++;
+}
+
+void Network::reset_accuracy()
+{
+    correct_predictions = 0;
+    total_predictions = 0;
+}
+
+void Network::print_accuracy()
+{
     accuracy = static_cast<double>(correct_predictions) / total_predictions;
     
     std::cout << "Accuracy: " << accuracy << std::endl;
