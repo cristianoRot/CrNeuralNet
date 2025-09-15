@@ -2,6 +2,7 @@
 
 #pragma once
 #include "Matrix.hpp"
+#include "InitType.hpp"
 
 enum class Activation {
     None,
@@ -12,6 +13,9 @@ enum class Activation {
 class Layer
 {
     protected:
+        size_t input_size;
+        size_t output_size;
+
         Matrix A;
         Matrix b;
         Matrix W;
@@ -29,9 +33,12 @@ class Layer
         Layer(size_t input_size, size_t output_size, const Matrix& prev_A, Matrix* prev_dA);
         ~Layer() = default;
 
+        void init_weights(InitType init_type);
+
         // Getters
         const Matrix& getA() const;
         const Matrix& get_dA() const;
+        Matrix& getA();
         Matrix& get_dA();
         const Matrix& get_dZ() const;
 

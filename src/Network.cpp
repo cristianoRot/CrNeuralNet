@@ -2,7 +2,7 @@
 
 #include "Network.hpp"
 
-Network::Network(std::vector<size_t> layer_sizes, double learning_rate)
+Network::Network(std::vector<size_t> layer_sizes, InitType init_type, double learning_rate)
 {
     if (layer_sizes.size() < 2)
     {
@@ -36,6 +36,20 @@ Network::Network(std::vector<size_t> layer_sizes, double learning_rate)
         *prev_A,
         prev_dA
     );
+
+    init_weights(init_type);
+}
+
+// Init weights
+
+void Network::init_weights(InitType init_type)
+{
+    for (size_t i = 0; i < layers.size(); i++)
+    {
+        layers[i].init_weights(init_type);
+    }
+
+    output_layer->init_weights(init_type);
 }
 
 const Matrix& Network::get_output() const { return output_layer->getA(); }
@@ -49,7 +63,12 @@ void Network::train(Dataset& dataset, size_t epochs)
         for (size_t i = 0; i < dataset.size(); i++)
         {
             forward(dataset.get_input(i));
-            backprop(dataset.get_output(i));
+
+            size_t label = dataset.get_output(i);
+
+            compute_accuracy(output_layer->getA(), label);
+
+            backprop(label);
             step(learning_rate);
         }
     }
@@ -67,9 +86,9 @@ void Network::forward(const Matrix& input)
     output_layer->forward();
 }
 
-void Network::backprop(const Matrix& y)
+void Network::backprop(size_t label)
 {
-    output_layer->set_dZ(loss(y));
+    loss_gradient(label);
     output_layer->backprop();
 
     for (size_t i = layers.size(); i-- > 0; )
@@ -78,9 +97,13 @@ void Network::backprop(const Matrix& y)
     }
 }
 
-Matrix Network::loss(const Matrix& y)
+void Network::loss_gradient(size_t label)
 {
-    return output_layer->getA() - y;
+    Matrix dZ = output_layer->getA();
+    double v = dZ.get(label, 0);
+
+    dZ.set(label, 0, v - 1.0);
+    output_layer->set_dZ(dZ);
 }
 
 void Network::step(double learning_rate)
@@ -91,4 +114,32 @@ void Network::step(double learning_rate)
     }
 
     output_layer->step(learning_rate);
+}
+
+void Network::compute_accuracy(const Matrix& prediction, size_t label)
+{
+    size_t argmax = Network::argmax(prediction);
+
+    if (argmax == label) correct_predictions++;
+    
+    total_predictions++;
+    accuracy = static_cast<double>(correct_predictions) / total_predictions;
+    
+    std::cout << "Accuracy: " << accuracy << std::endl;
+}
+
+size_t Network::argmax(const Matrix& prediction)
+{
+    size_t max_idx = 0;
+    double max_val = prediction.get(0, 0);
+
+    for (size_t i = 1; i < prediction.rows(); i++)
+    {
+        if (prediction.get(i, 0) > max_val)
+        {
+            max_idx = i;
+            max_val = prediction.get(i, 0);
+        }
+    }
+    return max_idx;
 }

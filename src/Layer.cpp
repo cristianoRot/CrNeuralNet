@@ -1,10 +1,15 @@
 // layer.cpp
 
 #include "Layer.hpp"
+#include <random>
+#include <cmath>
 
 // Constructor
 
 Layer::Layer(size_t input_size, size_t output_size, const Matrix& prev_A, Matrix* prev_dA) :
+    input_size(input_size),
+    output_size(output_size),
+
     A(output_size, 1),
     b(output_size, 1), 
     W(output_size, input_size),
@@ -28,6 +33,7 @@ OutputLayer::OutputLayer(size_t input_size, size_t output_size, const Matrix& pr
 // Getters and Setters
 
 const Matrix& Layer::getA() const { return A; }
+Matrix& Layer::getA() { return A; }
 const Matrix& Layer::get_dA() const { return dA; }
 Matrix& Layer::get_dA() { return dA; }
 
@@ -44,6 +50,42 @@ void Layer::step(double learning_rate)
 }
 
 // Hidden Layer
+
+void Layer::init_weights(InitType init_type)
+{
+    b.fill(0.0);
+
+    static thread_local std::mt19937 gen{ std::random_device{}() };
+
+    const size_t fan_in  = input_size;
+    const size_t fan_out = output_size;
+
+    switch (init_type)
+    {
+        case InitType::Zero:
+            W.fill(0.0);
+            break;
+
+        case InitType::Rand:
+        {
+            std::uniform_real_distribution<double> dist(-0.01, 0.01);
+            for (std::size_t r = 0; r < output_size; ++r)
+                for (std::size_t c = 0; c < input_size; ++c)
+                    W.set(r, c, dist(gen));
+            break;
+        }
+
+        case InitType::He:
+        {
+            const double stddev = std::sqrt(2.0 / static_cast<double>(fan_in));
+            std::normal_distribution<double> dist(0.0, stddev);
+            for (std::size_t r = 0; r < output_size; ++r)
+                for (std::size_t c = 0; c < input_size; ++c)
+                    W.set(r, c, dist(gen));
+            break;
+        }
+    }
+}
 
 void HiddenLayer::forward()
 {

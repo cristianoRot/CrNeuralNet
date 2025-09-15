@@ -11,6 +11,8 @@ Matrix::Matrix(size_t row, size_t col, std::vector<double> data) : row(row), col
 double Matrix::get(size_t row, size_t col) const { return data[row * this->col + col]; }
 void Matrix::set(size_t row, size_t col, double value) { data[row * this->col + col] = value; }
 
+void Matrix::fill(double value) { std::fill(data.begin(), data.end(), value); }
+
 size_t Matrix::rows() const { return row; }
 size_t Matrix::cols() const { return col; }
 

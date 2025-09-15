@@ -18,6 +18,8 @@ class Matrix
         double get(size_t row, size_t col) const;
         void set(size_t row, size_t col, double value);
 
+        void fill(double value);
+
         size_t rows() const;
         size_t cols() const;
 

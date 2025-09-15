@@ -2,7 +2,7 @@
 
 #include "Dataset.hpp"
 
-Dataset::Dataset(std::vector<Matrix> inputs, std::vector<Matrix> outputs)
+Dataset::Dataset(std::vector<Matrix> inputs, std::vector<size_t> outputs)
 {
     if (inputs.size() != outputs.size())
     {
@@ -17,7 +17,7 @@ const size_t Dataset::size() const { return inputs.size(); }
 
 const Matrix& Dataset::get_input(size_t index) const { return inputs[index]; }
 
-const Matrix& Dataset::get_output(size_t index) const { return outputs[index]; }
+const size_t Dataset::get_output(size_t index) const { return outputs[index]; }
 
 void Dataset::shuffle() 
 { 

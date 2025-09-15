@@ -15,7 +15,7 @@ SOURCES = $(wildcard $(SRC_DIR)/*.cpp)
 OBJECTS = $(SOURCES:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 
 # Target executable
-TARGET = test_network
+TARGET = test_simple
 
 # Default target
 all: $(TARGET)
@@ -29,8 +29,8 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Link executable
-$(TARGET): $(OBJECTS) test_network.cpp
-	$(CXX) $(CXXFLAGS) -o $@ test_network.cpp $(OBJECTS) $(LDFLAGS)
+$(TARGET): $(OBJECTS) test_simple.cpp
+	$(CXX) $(CXXFLAGS) -o $@ test_simple.cpp $(OBJECTS) $(LDFLAGS)
 
 # Clean build files
 clean:
