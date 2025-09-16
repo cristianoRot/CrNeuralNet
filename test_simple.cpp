@@ -21,7 +21,7 @@ int main() {
     Network network({2, 2, 2}, InitType::He, 0.1);
     
     std::cout << "Starting training..." << std::endl;
-    network.train(dataset, 10000);
+    network.train(dataset, 100);
     
     std::cout << "Training completed!" << std::endl;
     return 0;

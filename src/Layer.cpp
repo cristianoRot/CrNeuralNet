@@ -20,6 +20,9 @@ Layer::Layer(size_t input_size, size_t output_size, const Matrix* prev_A, Matrix
     dW(output_size, input_size),
     dZ(output_size, 1),
 
+    vW(output_size, input_size),
+    vb(output_size, 1),
+
     prev_A(prev_A),
     prev_dA(prev_dA)
 { }
@@ -45,8 +48,11 @@ void Layer::set_dZ(const Matrix& g) { dZ = g; }
 
 void Layer::step(double learning_rate)
 {
-    W -= (dW * learning_rate);
-    b -= (db * learning_rate);
+    vW = (vW * 0.9) - (dW * learning_rate);
+    vb = (vb * 0.9) - (db * learning_rate);
+
+    W += vW;
+    b += vb;
 }
 
 // Hidden Layer
@@ -54,6 +60,8 @@ void Layer::step(double learning_rate)
 void Layer::init_weights(InitType init_type)
 {
     b.fill(0.0);
+    vW.fill(0.0);
+    vb.fill(0.0);
 
     static thread_local std::mt19937 gen{ std::random_device{}() };
 

@@ -26,6 +26,9 @@ class Layer
         Matrix dW;
         Matrix dZ;
 
+        Matrix vb;
+        Matrix vW;
+
         const Matrix* prev_A;
         Matrix* prev_dA;
         
